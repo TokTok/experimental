@@ -12,15 +12,62 @@ concurrency:
 
 jobs:
   wireguard-vpn:
+    strategy:
+      matrix:
+        node: [2, 3, 4, 5, 6, 7, 8, 9]
+#       node: [2, 3, 4]
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          sudo apt install wireguard
-          echo "UGdw/CjBpnKF/xJ3/orlUty29kYi1NMnXdXVYExFFH8=" > privatekey
-          sudo ip link add dev wg0 type wireguard
-          sudo ip address add dev wg0 10.100.0.2 peer 10.100.0.1
-          sudo wg set wg0 listen-port 48123 private-key privatekey peer Tb1SOeotVZa6FbEmRq1x4Wo62PxjrjLeHbRYp4kTH2A= allowed-ips 10.100.0.0/24 endpoint code.tox.chat:51820
-          sudo ip link set up dev wg0
-          #ping 10.100.0.1
-          sudo ifconfig wg0
+      - uses: actions/checkout@v3
+      - name: Setup wireguard
+        run: |
+          sudo apt-get -y --no-install-recommends install redis-tools wireguard
+          sudo cp .github/buildfarm/wg0-${{ matrix.node }}.conf /etc/wireguard/wg0.conf
+          sudo systemctl enable wg-quick@wg0.service
+          sudo systemctl start wg-quick@wg0.service || (sudo systemctl status wg-quick@wg0.service && false)
+          sudo systemctl start ssh
+          mkdir "$HOME/.ssh"
+          cp .github/buildfarm/authorized_keys "$HOME/.ssh/"
+      - name: Start redis
+        if: matrix.node == 2
+        run: |
+          docker pull "redis:alpine"
+          docker run --detach --rm -i --network host "redis:alpine"
+      - name: Wait for VPN to be up
+        run: |
+          ifconfig wg0
           sudo wg show
+          # VPN server and redis/buildfarm server need to be up.
+          for node in `seq 1 9`; do
+            for i in `seq 0 9`; do
+              if ping -c1 "10.100.0.$node"; then break; fi
+              sleep 1
+            done
+          done
+          # Error if VPN server is still down after the above timeout.
+          ping -c1 10.100.0.1
+          sudo wg show
+          ip route
+          # Wait for redis connectivity.
+          for i in `seq 0 9`; do
+            if redis-cli -h 10.100.0.2 -p 6379 ping; then break; fi
+            sleep 1
+          done
+          redis-cli -h 10.100.0.2 -p 6379 ping
+      - name: Pull latest worker image
+        run: docker pull "toxchat/buildfarm-worker"
+      - name: Test connectivity to other nodes
+        run: |
+          ping -c1 10.100.0.1  # server
+          ping -c1 10.100.0.2  # either self or some other node
+          ping -c1 10.100.0.3  # either some other node or self
+      - name: Start worker
+        if: matrix.node != 2
+        run: |
+          docker run          --privileged --rm -i --network host -v "$PWD/.github/buildfarm/worker-${{ matrix.node }}.yml:/app/build_buildfarm/examples/config.minimal.yml" "toxchat/buildfarm-worker"
+      - name: Start server and worker
+        if: matrix.node == 2
+        run: |
+          docker pull "toxchat/buildfarm-server"
+          docker run --detach --privileged --rm -i --network host -v "$PWD/.github/buildfarm/worker-${{ matrix.node }}.yml:/app/build_buildfarm/examples/config.minimal.yml" "toxchat/buildfarm-worker"
+          docker run --rm -i --network host -v "$PWD/.github/buildfarm/server-${{ matrix.node }}.yml:/app/build_buildfarm/examples/config.minimal.yml" "toxchat/buildfarm-server"

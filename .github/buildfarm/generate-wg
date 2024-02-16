@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo '# Peers for the server' >wg0-1.conf
+
+readarray -t NODES <<<"$(seq 2 9)"
+
+for NODE in "${NODES[@]}"; do
+  PRIVATE_KEY="$(wg genkey)"
+  sed -e "s!@NODE@!$NODE!g;s!@PRIVATE_KEY@!$PRIVATE_KEY!g" wg0.conf.template >"wg0-$NODE.conf"
+  sed -e "s!@NODE@!$NODE!g" worker.yml.template >"worker-$NODE.yml"
+  echo >>wg0-1.conf
+  echo '[Peer]' >>wg0-1.conf
+  echo "PublicKey = $(echo "$PRIVATE_KEY" | wg pubkey)" >>wg0-1.conf
+  echo "AllowedIPs = 10.100.0.$NODE/32" >>wg0-1.conf
+done

@@ -1,0 +1,12 @@
+backplane:
+  redisUri: "redis://10.100.0.2:6379"
+  queues:
+    - name: "cpu"
+      properties:
+        - name: "min-cores"
+          value: "*"
+        - name: "max-cores"
+          value: "*"
+server:
+  publicName: "10.100.0.2:8980"
+prometheusPort: 9091

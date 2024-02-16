@@ -1,0 +1,11 @@
+backplane:
+  redisUri: "redis://10.100.0.2:6379"
+  queues:
+    - name: "cpu"
+      properties:
+        - name: "min-cores"
+          value: "*"
+        - name: "max-cores"
+          value: "*"
+worker:
+  publicName: "10.100.0.8:8981"

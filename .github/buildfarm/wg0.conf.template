@@ -1,0 +1,9 @@
+[Interface]
+PrivateKey = @PRIVATE_KEY@
+Address = 10.100.0.@NODE@/24
+
+[Peer]
+PublicKey = Tb1SOeotVZa6FbEmRq1x4Wo62PxjrjLeHbRYp4kTH2A=
+Endpoint = code.tox.chat:51820
+AllowedIPs = 10.100.0.0/24
+PersistentKeepalive = 25
