@@ -1,0 +1,38 @@
+name: deploy
+
+on:
+  # Allow manual trigger.
+  workflow_dispatch:
+  pull_request:
+    branches: ["master"]
+  push:
+    branches: ["master"]
+    tags: ["v*"]
+
+# Cancel old PR builds when pushing new commits.
+concurrency:
+  group: deploy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  project_name: experimental
+
+jobs:
+
+  #############################################################
+  # Preparation jobs
+  #############################################################
+
+  prepare:
+    name: Prepare
+    uses: iphydf/ci-tools/.github/workflows/deploy-prepare.yml@deploy-wf
+
+  hello:
+    name: Hello
+    uses: iphydf/ci-tools/.github/workflows/deploy-artifact.yml@deploy-wf
+    with:
+      project-name: Experimental
+      artifact-source: hello.txt
+      artifact: hello-$VERSION.txt
+      build: hello
+      run: echo "Hello, world from $GITHUB_SHA on $(date)!" >hello.txt
