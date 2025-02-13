@@ -1,0 +1,22 @@
+name: draft
+
+on:
+  push:
+    branches: [master]
+  pull_request_target:
+    branches: [master]
+    types: [opened, reopened, synchronize]
+
+# Cancel old builds when pushing new commits.
+concurrency:
+  group: draft-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    uses: TokTok/ci-tools/.github/workflows/release-drafter.yml@master
+
+  netlify:
+    uses: TokTok/ci-tools/.github/workflows/netlify.yml@master
+    secrets:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

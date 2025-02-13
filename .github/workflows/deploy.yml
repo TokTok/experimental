@@ -9,13 +9,10 @@ on:
     branches: ["master"]
     tags: ["v*"]
 
-# Cancel old PR builds when pushing new commits.
+# Cancel old builds when pushing new commits.
 concurrency:
   group: deploy-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
-env:
-  project_name: experimental
 
 jobs:
 
