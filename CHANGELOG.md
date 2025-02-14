@@ -1,3 +1,11 @@
+<a name="v0.1.3"></a>
+
+## v0.1.3 (2025-02-14)
+
+### Release notes
+
+Some release notes here.
+
 <a name="v0.1.2"></a>
 
 ## v0.1.2 (2025-02-14)
