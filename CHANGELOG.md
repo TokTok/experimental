@@ -1,3 +1,19 @@
+<a name="v0.1.6-rc.1"></a>
+
+## v0.1.6-rc.1 (2025-02-16)
+
+### Release notes
+
+Test release candidate.
+
+#### Bug Fixes
+
+- Add releaser token. ([f07ffe1b](https://github.com/TokTok/experimental/commit/f07ffe1b9224e94f15d2d5adda884e2af5f392b3))
+
+#### Features
+
+- Add `workflow_dispatch` for all CI workflows. ([95b568f6](https://github.com/TokTok/experimental/commit/95b568f6e71bbc8658c2d03c4ef03c7218c7e50c))
+
 <a name="v0.1.5"></a>
 
 ## v0.1.5 (2025-02-16)
