@@ -1,3 +1,11 @@
+<a name="v0.1.5-rc.2"></a>
+
+## v0.1.5-rc.2 (2025-02-16)
+
+### Release notes
+
+Another experimental release. Nothing done, still releasing. Release candidate first.
+
 <a name="v0.1.5-rc.1"></a>
 
 ## v0.1.5-rc.1 (2025-02-16)
